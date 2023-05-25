@@ -5,7 +5,7 @@ class HumanPlayer
     @mode = mode 
   end
 
-  def choose_4_colors(round)
+  def choose_4_colors(color_pallette, round)
     puts "Round #{round}: Choose 4 colors (1-6) or q to quit:"
     input = gets.chomp
 
@@ -14,13 +14,12 @@ class HumanPlayer
     else
       numbers = input.split("").map {|element| element.to_i}
       if numbers.all?{|element| element.between?(1,6)}
-        return input
+        return color_pallette.values_at(numbers)
       else
         puts "You have to choose a number BETWEEN 1 and 6!:".colorize(:red)
-        choose_4_colors(round)
+        choose_4_colors(color_pallette, round)
       end
     end
-
   end
 
   def quit_game()
