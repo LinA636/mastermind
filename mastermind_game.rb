@@ -5,7 +5,7 @@ require "colorize"
 require 'pry-byebug'
 
 class MastermindGame
-  attr_accessor :guess_rows, :game_round
+  attr_accessor :guess_rows, :game_round, :secret_code
   attr_reader :human_player, :comp_player, :mode, :color_pallette
 
   def initialize(mode)
@@ -31,34 +31,76 @@ class MastermindGame
 
   private
   def play_human_breaks()
-    # make and safe secret code
-    self.comp_player.make_secret_code(self.color_pallette)
-    print_colors(self.comp_player.secret_code)
-    puts "The 6 colors you can choose from (1-6):"
-    print_colors(self.color_pallette)
-    puts ""
+    self.secret_code= self.comp_player.make_secret_code(self.color_pallette)
+    print_colors(self.secret_code)
+    print_color_palette()
     for i in 0..11
       chosen_colors = human_player.choose_4_colors(self.color_pallette, self.game_round)
       unless chosen_colors
-        quit_game()
+        break
       end
-      guess_rows.push(chosen_colors)
-      print_colors(guess_rows[i])
-      circle_nums = comp_player.give_feedback(guess_rows[i])
-      if circle_nums.first == 4
-        declare_breaker_wins()
-      else
-        print_full_circles(circle_nums.first)
-        print_empty_circles(circle_nums.last)
-      end
+      self.guess_rows.push(chosen_colors)
+      print_colors(self.guess_rows[i])
+      self.comp_player.give_feedback(self.guess_rows[i])
     end
     declare_creater_wins()
+  end
+
+  def play_human_creates()
+    puts "Create a secret code:"
+    print_colors(self.color_pallette)
+    self.secret_code= self.human_player.choose_4_colors(self.color_pallette, 0)
+    self.guess_rows.push(self.comp_player.make_guess(self.color_pallette))
+    for i in 0..11 do
+      print_colors(self.guess_rows[i])
+      feedback = give_feedback(self.guess_rows[i])
+      p feedback
+      unless feedback
+        break
+      end
+      self.guess_rows.push(self.comp_player.make_guess(self.color_pallette))
+    end
+  end
+
+  def give_feedback(chosen_colors)
+    help_arr = check_right_color_and_pos(chosen_colors)
+    number_ball_right_color_and_pos = help_arr.first
+    if number_ball_right_color_and_pos == 4
+      declare_breaker_wins()
+    else
+      right_indexes = help_arr.last
+      number_ball_right_color = check_right_color(chosen_colors, right_indexes)
+      print_full_circles(number_ball_right_color_and_pos)
+      print_empty_circles(number_ball_right_color)
+    end
+  end
+
+  def check_right_color_and_pos(chosen_colors)
+    sum = 0
+    right_ball_saver = []
+    chosen_colors.each_with_index do |ball, index|
+      if ball.color_name == self.secret_code[index].color_name
+        sum = sum + 1
+        right_ball_saver.push(ball)
+      end
+    end
+    return [sum, right_ball_saver]
+  end 
+
+  def check_right_color(chosen_colors, right_ball_saver)2
+    chosen_colors.select{|ball| !right_ball_saver.include?(ball) && self.secret_code.include?(ball)}.length
   end
 
   def print_colors(balls_to_print)
     balls_to_print.length.times do |i|
       print " #{balls_to_print[i].symbol} "
     end
+  end
+
+  def print_color_palette()
+    puts "The 6 colors you can choose from (1-6):"
+    print_colors(self.color_pallette)
+    puts ""
   end
 
   def print_empty_circles(number)
@@ -95,7 +137,7 @@ class MastermindGame
   end
 
   def quit_game()
-    return
+    return false
   end
 
 

@@ -12,7 +12,7 @@ class HumanPlayer
     input = gets.chomp
 
     if input == 'q'
-      quit_game
+      quit_game()
     else
       numbers = input.split('').map(&:to_i)
       if numbers.length == 4 && numbers.all? { |element| element.between?(1, 6) }
@@ -24,7 +24,7 @@ class HumanPlayer
     end
   end
 
-  def quit_game
+  def quit_game()
     puts 'Was fun playing with you. See you next time!'
     false
   end
