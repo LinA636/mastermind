@@ -50,15 +50,14 @@ class MastermindGame
     puts "Create a secret code:"
     print_colors(self.color_pallette)
     self.secret_code= self.human_player.choose_4_colors(self.color_pallette, 0)
-    self.guess_rows.push(self.comp_player.make_guess(self.color_pallette))
-    for i in 0..11 do
-      print_colors(self.guess_rows[i])
-      feedback = give_feedback(self.guess_rows[i])
-      p feedback
+    self.guess_rows.push(self.comp_player.make_guess(self.color_pallette, 1))
+    for i in 1..12 do
+      print_comp_guess(self.guess_rows[i-1], i-1)
+      feedback = give_feedback(self.guess_rows[i-1])
       unless feedback
         break
       end
-      self.guess_rows.push(self.comp_player.make_guess(self.color_pallette))
+      self.guess_rows.push(self.comp_player.make_guess(self.color_pallette, i+1))
     end
   end
 
@@ -100,6 +99,12 @@ class MastermindGame
   def print_color_palette()
     puts "The 6 colors you can choose from (1-6):"
     print_colors(self.color_pallette)
+    puts ""
+  end
+
+  def print_comp_guess(balls_to_print, round)
+    print "Round #{round}: "
+    print_colors(balls_to_print)
     puts ""
   end
 
